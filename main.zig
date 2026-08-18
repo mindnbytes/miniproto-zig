@@ -1,12 +1,12 @@
 const std = @import("std");
-const Tuple = struct {
+const Args = struct {
     a: i32,
     b: i32,
 };
 const Command = union(enum) {
     Ping,
     Echo: []u8,
-    Add: Tuple,
+    Add: Args,
     Quit,
 };
 
