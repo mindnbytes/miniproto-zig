@@ -18,7 +18,7 @@ const Command = union(Name) {
 
 const ParseError = error{ UnknownCommand, InvalidNumber };
 
-fn parseIntFromNext(tokens: *std.mem.TokenIterator(u8, .any)) ParseError!i32 {
+fn parseNextInt(tokens: *std.mem.TokenIterator(u8, .any)) ParseError!i32 {
     const str = tokens.next() orelse return ParseError.InvalidNumber;
     const num = std.fmt.parseInt(i32, str, 10) catch return ParseError.InvalidNumber;
     return num;
@@ -35,8 +35,8 @@ fn parse(input: []const u8) ParseError!Command {
         .Quit => Command.Quit,
         .Echo => Command{ .Echo = tokens.rest() },
         .Add => blk: {
-            const a = try parseIntFromNext(&tokens);
-            const b = try parseIntFromNext(&tokens);
+            const a = try parseNextInt(&tokens);
+            const b = try parseNextInt(&tokens);
             break :blk Command{ .Add = .{ .a = a, .b = b } };
         },
     };
