@@ -118,10 +118,13 @@ test "parse rejects Add with one operand" {
     try std.testing.expectError(ParseError.InvalidNumber, parse("Add 123"));
 }
 
-test "parse rejects Add with an invalid operand" {
-    try std.testing.expectError(ParseError.InvalidNumber, parse("Add 11 bannana"));
+test "parse rejects Add with an invalid first operand" {
+    try std.testing.expectError(ParseError.InvalidNumber, parse("Add bannana 11"));
 }
 
+test "parse rejects Add with an invalid second operand" {
+    try std.testing.expectError(ParseError.InvalidNumber, parse("Add 11 bannana"));
+}
 test "parse rejects empty input" {
     try std.testing.expectError(ParseError.UnknownCommand, parse(""));
 }
