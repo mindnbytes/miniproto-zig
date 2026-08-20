@@ -68,3 +68,71 @@ pub fn main() !void {
         }
     }
 }
+
+test "parse Ping" {
+    const command = try parse("Ping");
+    try std.testing.expectEqual(Command.Ping, command);
+}
+
+test "parse Quit" {
+    const command = try parse("Quit");
+    try std.testing.expectEqual(Command.Quit, command);
+}
+
+test "parse empty Echo" {
+    const command = try parse("Echo");
+    switch (command) {
+        .Echo => |pl| try std.testing.expectEqualStrings("", pl),
+        else => return error.WrongVariant,
+    }
+}
+
+test "parse Echo more words" {
+    const command = try parse("Echo Hi! It's me.");
+    switch (command) {
+        .Echo => |pl| try std.testing.expectEqualStrings("Hi! It's me.", pl),
+        else => return error.WrongVariant,
+    }
+}
+
+test "parse Add with two args" {
+    const command = try parse("Add 2 33");
+    switch (command) {
+        .Add => |arg| {
+            try std.testing.expectEqual(2, arg.a);
+            try std.testing.expectEqual(33, arg.b);
+        },
+        else => return error.WrongVariant,
+    }
+}
+
+test "parse Add drops extra args" {
+    const command = try parse("Add 1 2 199");
+    switch (command) {
+        .Add => |arg| {
+            try std.testing.expectEqual(1, arg.a);
+            try std.testing.expectEqual(2, arg.b);
+        },
+        else => return error.WrongVariant,
+    }
+}
+
+test "parse Unknown Command" {
+    try std.testing.expectError(ParseError.UnknownCommand, parse("What?"));
+}
+
+test "parse Add with zero args" {
+    try std.testing.expectError(ParseError.InvalidNumber, parse("Add"));
+}
+
+test "parse Add with one arg" {
+    try std.testing.expectError(ParseError.InvalidNumber, parse("Add 123"));
+}
+
+test "parse Add with wrong arg" {
+    try std.testing.expectError(ParseError.InvalidNumber, parse("Add 11 bannana"));
+}
+
+test "parse empty" {
+    try std.testing.expectError(ParseError.UnknownCommand, parse(""));
+}
