@@ -18,39 +18,28 @@ const Command = union(Name) {
 
 const ParseError = error{ UnknownCommand, InvalidNumber };
 
+fn parseIntFromNext(tokens: *std.mem.TokenIterator(u8, .any)) ParseError!i32 {
+    const str = tokens.next() orelse return ParseError.InvalidNumber;
+    const num = std.fmt.parseInt(i32, str, 10) catch return ParseError.InvalidNumber;
+    return num;
+}
+
 fn parse(input: []const u8) ParseError!Command {
     var tokens = std.mem.tokenizeAny(u8, input, " ");
-    if (tokens.next()) |name_token| {
-        const name = std.meta.stringToEnum(Name, name_token) orelse {
-            return ParseError.UnknownCommand;
-        };
-        return switch (name) {
-            .Ping => Command.Ping,
-            .Quit => Command.Quit,
-            .Echo => blk: {
-                const s = tokens.rest();
-                break :blk Command{ .Echo = s };
-            },
-            .Add => blk: {
-                const aStr = tokens.next() orelse {
-                    break :blk ParseError.InvalidNumber;
-                };
-                const a = std.fmt.parseInt(i32, aStr, 10) catch {
-                    break :blk ParseError.InvalidNumber;
-                };
-
-                const bStr = tokens.next() orelse {
-                    break :blk ParseError.InvalidNumber;
-                };
-                const b = std.fmt.parseInt(i32, bStr, 10) catch {
-                    break :blk ParseError.InvalidNumber;
-                };
-                break :blk Command{ .Add = .{ .a = a, .b = b } };
-            },
-        };
-    }
-    // first call for tokens.next() == null
-    return ParseError.UnknownCommand;
+    // empty input
+    const name_token = tokens.next() orelse return ParseError.UnknownCommand;
+    // not a Command Name
+    const name = std.meta.stringToEnum(Name, name_token) orelse return ParseError.UnknownCommand;
+    return switch (name) {
+        .Ping => Command.Ping,
+        .Quit => Command.Quit,
+        .Echo => Command{ .Echo = tokens.rest() },
+        .Add => blk: {
+            const a = try parseIntFromNext(&tokens);
+            const b = try parseIntFromNext(&tokens);
+            break :blk Command{ .Add = .{ .a = a, .b = b } };
+        },
+    };
 }
 
 pub fn main() !void {
