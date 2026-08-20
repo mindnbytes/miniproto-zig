@@ -117,22 +117,22 @@ test "parse Add drops extra args" {
     }
 }
 
-test "parse Unknown Command" {
+test "parse rejects unknown command" {
     try std.testing.expectError(ParseError.UnknownCommand, parse("What?"));
 }
 
-test "parse Add with zero args" {
+test "parse rejects Add without operands" {
     try std.testing.expectError(ParseError.InvalidNumber, parse("Add"));
 }
 
-test "parse Add with one arg" {
+test "parse rejects Add with one operand" {
     try std.testing.expectError(ParseError.InvalidNumber, parse("Add 123"));
 }
 
-test "parse Add with wrong arg" {
+test "parse rejects Add with an invalid operand" {
     try std.testing.expectError(ParseError.InvalidNumber, parse("Add 11 bannana"));
 }
 
-test "parse empty" {
+test "parse rejects empty input" {
     try std.testing.expectError(ParseError.UnknownCommand, parse(""));
 }
